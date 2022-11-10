@@ -12,4 +12,4 @@ npm i
 node app.js / nodemon app.js
 ```
 
-* Mongodb is applied in this project, please make sure it's installed on your device.  
+* MongoDB is applied in this project, please make sure it's installed on your device.  
