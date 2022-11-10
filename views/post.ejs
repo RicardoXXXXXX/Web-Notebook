@@ -9,12 +9,12 @@
   <hr style="border-top: 1px solid #353935" />
   <p><%=content %></p>
     
-  <form class="post-form" action="/edit" method="post">
+  <form class="post-form" action="/edit" method="POST">
     <input type="hidden" name="id" value=<%=id %> >
     <button type="submit" class="btn btn-primary edit-btn">Edit</button>
   </form>
 
-  <form class="post-form" action="/delete" method="post">
+  <form class="post-form" action="/delete" method="POST">
     <button type="submit" class="btn btn-danger delete-btn" name="id" value=<%=id %>>Delete</button>
   </form>
 
