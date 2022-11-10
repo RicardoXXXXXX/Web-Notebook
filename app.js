@@ -2,9 +2,7 @@ const date = require(__dirname + "/date.js");
 const express = require("express");
 const bodyParser = require("body-parser");
 const ejs = require("ejs");
-const _ = require("lodash");
 const mongoose = require("mongoose");
-const e = require("express");
 
 const homeStartingContent = "Wanna write something down today?";
 const aboutContent =
@@ -14,7 +12,6 @@ const contactContent =
 
 const app = express();
 const day = date.getDate();
-const posts = [];
 
 app.set("view engine", "ejs"); //Enable ejs
 app.use(bodyParser.urlencoded({ extended: true })); //Enable body-parser
