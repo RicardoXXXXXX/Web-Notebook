@@ -2,7 +2,7 @@
 This project provides a web application which allows users to CRUD diaries online.
 
 ## Instructions
-* Please use the following command before running the server.
+* Please use the following command to install all the required node modules before running the server.
 ```
 npm i
 ```
