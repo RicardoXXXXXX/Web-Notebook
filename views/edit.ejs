@@ -1,0 +1,31 @@
+<%- include("partials/header"); -%>
+
+<div class="content">
+  <h1>Compose</h1>
+  <div class="form-group">
+    <form action="/edit" method="post">
+        <label for="postTitle">Title</label>
+        <input
+            type="text"
+            name="postTitle"
+            placeholder="Post Title"
+            id="postTitle"
+            class="form-control"
+            required="required"
+            />
+
+        <label for="postBody">Body</label>
+        <textarea
+            name="postContent"
+            rows="5"
+            cols="40"
+            placeholder="Post Body"
+            id="postContent"
+            class="form-control"
+        ></textarea>
+    </div>
+    <input type="hidden"  name="id" value= <%=id %>>
+    <button class="btn btn-primary" type="submit">submit</button>
+  </form>
+</div>
+<%- include("partials/footer"); -%>
