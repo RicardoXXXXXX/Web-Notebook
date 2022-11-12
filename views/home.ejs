@@ -8,15 +8,14 @@
   <% contents.forEach((post)=>{ %>
   <div id="single-post" >
     <form action="/posts/<%= post.title %>" method="POST">
-      <input 
-      type="hidden" name="id" value=<%=post.id %> >
+      <input type="hidden" name="id" value=<%=post.id %> >
       <h3 style="display: inline">
         <%=post.title %>
         <h4 style="display: inline">- written at <%=post.date %></h4>
       </h3>
       <p>
         <%=post.content.substring(0,200) + "..." %>
-        <button type="submit" class="btn-expand">
+        <button type="submit" class="btn-expand" name= "userEmail" value=<%= userEmail %>>
         <p>read more</p>
         </button>
       </p>
@@ -24,8 +23,10 @@
   </div>
   <% }); %>
   <hr style="border-top: 1px solid #353935" />
-  <button type="button" class="btn btn btn-primary" style="margin-top: 1rem;" onclick="location.href='/compose'">
-    + New Post
-  </button>
+  <div>
+  <form action="/compose" method="GET">
+    <button type="submit" class="btn btn btn-primary" style="margin-top: 1rem;"  name= "userEmail" value=<%= userEmail %>>+ New Post</button>
+  </form>
+  </div>
 </div>
 <%- include("partials/footer"); -%>

@@ -18,7 +18,7 @@ app.use(bodyParser.urlencoded({ extended: true })); //Enable body-parser
 app.use(express.static("public")); //Enable server to work with static codes.
 
 //Connect database, create postDB
-mongoose.connect("mongodb://localhost:27017/postDB", {
+mongoose.connect("mongodb://localhost:27017/userDB", {
   useNewUrlParser: true,
 });
 
@@ -31,18 +31,36 @@ const postSchema = {
   content: {
     type: String,
   },
-  date: {
-    type: String,
-  },
+  date: String,
+  userEmail: String,
 };
 
 //Build collection called posts
 const Post = mongoose.model("Post", postSchema);
 
+//Build user schema
+const userSchema = {
+  email: {
+    type: String,
+    required: [true, "Please add an email."],
+  },
+  password: {
+    type: String,
+    required: [true, "Please add a password."],
+  },
+};
+//Build collection called posts
+const User = mongoose.model("User", userSchema);
+
 //Responce to the get homepage request from browser
 app.get("/", (req, res) => {
-  //Show all data from the database.
-  Post.find({}, (err, foundItems) => {
+  res.render("start");
+});
+
+app.get("/home", (req, res) => {
+  const userEmail = req.query.valid;
+
+  Post.find({ userEmail: userEmail }, (err, foundItems) => {
     if (err) {
       console.log(err);
     } else {
@@ -50,46 +68,10 @@ app.get("/", (req, res) => {
         startingContent: homeStartingContent,
         contents: foundItems,
         date: day,
+        userEmail: userEmail,
       });
     }
   });
-});
-
-//Receive the post request from compose page.
-app.post("/compose", (req, res) => {
-  const id = req.body.id;
-  const title = req.body.postTitle;
-  const content = req.body.postContent;
-  const date = day;
-
-  //id === "" means this post is new.
-  if (id === "") {
-    //If title isn't empty, add new post.
-    if (title !== "") {
-      const newPost = Post({
-        title: title,
-        content: content,
-        date: date,
-      });
-      newPost.save(); //Add new post.
-    } else {
-      //For empty title, show error message, adding unsuccessfully.
-      console.log("Sorry, title cannot be empty.");
-    }
-  }
-  //id isn't empty means this post needs to be changed
-  else {
-    Post.findOneAndUpdate(
-      { _id: id },
-      { title: title, content: content, date: date },
-      (err, foundList) => {
-        if (!err) {
-          console.log(title + "is successfully changed");
-        }
-      }
-    );
-  }
-  res.redirect("/"); //Go back to the homepage.
 });
 
 app.get("/about", (req, res) => {
@@ -102,24 +84,76 @@ app.get("/contact", (req, res) => {
 
 //Direct to add-post page.
 app.get("/compose", (req, res) => {
+  const email = req.query.userEmail;
   //New post, id is empty by now.
-  res.render("compose", { id: "" });
+  res.render("compose", { id: "", userEmail: email });
+});
+
+app.get("/login", (req, res) => {
+  res.render("login");
+});
+
+app.get("/register", (req, res) => {
+  res.render("register");
+});
+
+//Receive the post request from compose page.
+app.post("/compose", (req, res) => {
+  const id = req.body.id;
+  const title = req.body.postTitle;
+  const content = req.body.postContent;
+  const date = day;
+  const userEmail = req.body.userEmail;
+
+  //id === "" means this post is new.
+  if (id === "") {
+    //If title isn't empty, add new post.
+    if (title !== "") {
+      const newPost = Post({
+        userEmail: userEmail,
+        title: title,
+        content: content,
+        date: date,
+      });
+      newPost.save(); //Add new post.
+    } else {
+      //For empty title, show error message, adding unsuccessfully.
+      console.log("Sorry, title cannot be empty.");
+    }
+  }
+  //id isn't empty,which means this post needs to be changed
+  else {
+    Post.findOneAndUpdate(
+      { _id: id },
+      { title: title, content: content, date: date },
+      (err, foundList) => {
+        if (!err) {
+          console.log(title + " is successfully changed");
+        }
+      }
+    );
+  }
+  //Go back to the homepage.
+  const email = encodeURIComponent(userEmail);
+  res.redirect("/home?valid=" + email);
 });
 
 //Dynamic response
 //Use for safety reason, using POST method to pass id.
 app.post("/posts/:title", (req, res) => {
   const id = req.body.id;
+  const email = req.body.userEmail;
   Post.findById(id, (err, post) => {
     if (err) {
       console.log(err);
     } else {
       //Everything is OK! Show the posts.
       res.render("post", {
-        id: post.id,
+        id: id,
         title: post.title,
         date: post.date,
         content: post.content,
+        userEmail: email,
       });
     }
   });
@@ -128,12 +162,16 @@ app.post("/posts/:title", (req, res) => {
 //This function delete the post by id
 app.post("/edit", (req, res) => {
   const id = req.body.id;
-  res.render("compose", { id: id });
+  const email = req.body.userEmail;
+  //For editing a post userEmail isn't needed.
+  res.render("compose", { id: id, userEmail: email });
 });
 
 //This function delete the post by id
 app.post("/delete", (req, res) => {
   const id = req.body.id;
+  const userEmail = req.body.userEmail;
+  //Delete post by id
   Post.findByIdAndDelete(id, (err, deletedPost) => {
     if (err) {
       console.log(err);
@@ -142,8 +180,78 @@ app.post("/delete", (req, res) => {
     }
   });
 
-  //Go back to home page.
-  res.redirect("/");
+  //Go back to the homepage.
+  const email = encodeURIComponent(userEmail);
+  res.redirect("/home?valid=" + email);
+});
+
+//This function responses the register request.
+app.post("/register", (req, res) => {
+  const email = req.body.email;
+  const password = req.body.password;
+  // User.findOne({ email: email }, (err, foundUser) => {
+  //   console.log(foundUser);
+  //   if (foundUser != null) {
+  //     console.log("Exits");
+  //   }
+  // });
+
+  if (email !== "" && password !== "") {
+    //If the email already exits, show the error message.
+    User.findOne({ email: email }, (err, foundUser) => {
+      if (foundUser != null) {
+        res.render("fail_message", { fail_msg: "This email already exits." });
+      } else {
+        //Everything ok, create this account.
+        const newUser = new User({
+          email: email,
+          password: password,
+        });
+        //Save new user
+        newUser.save((err) => {
+          if (err) {
+            console.log(err);
+          } else {
+            Post.find({ userEmail: email }, (err, foundPosts) => {
+              res.render("home", {
+                startingContent: homeStartingContent,
+                contents: foundPosts,
+                date: day,
+                userEmail: email,
+              });
+            });
+          }
+        });
+      }
+    });
+  }
+});
+
+//This function responses the login request.
+app.post("/login", (req, res) => {
+  const email = req.body.email;
+  const password = req.body.password;
+
+  //Check if this email already exits.
+  User.findOne({ email: email }, (err, foundUser) => {
+    if (!err) {
+      if (foundUser.password === password) {
+        //Show all data from the database.
+        Post.find({ userEmail: email }, (err, foundItems) => {
+          if (err) {
+            console.log(err);
+          } else {
+            res.render("home", {
+              startingContent: homeStartingContent,
+              contents: foundItems,
+              date: day,
+              userEmail: email,
+            });
+          }
+        });
+      }
+    }
+  });
 });
 
 //Build connection.

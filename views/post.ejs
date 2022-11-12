@@ -11,10 +11,11 @@
     
   <form class="post-form" action="/edit" method="POST">
     <input type="hidden" name="id" value=<%=id %> >
-    <button type="submit" class="btn btn-primary edit-btn">Edit</button>
+    <button type="submit" class="btn btn-primary edit-btn" name="userEmail" value=<%=userEmail %>>Edit</button>
   </form>
 
   <form class="post-form" action="/delete" method="POST">
+    <input type="hidden" name="userEmail" value=<%=userEmail %> >
     <button type="submit" class="btn btn-danger delete-btn" name="id" value=<%=id %>>Delete</button>
   </form>
 
