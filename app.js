@@ -3,7 +3,8 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const ejs = require("ejs");
 const mongoose = require("mongoose");
-const md5 = require("md5");
+const bcrypt = require("bcrypt");
+const saltRounds = 11;
 
 const homeStartingContent = "Wanna write something down today?";
 const aboutContent =
@@ -189,60 +190,65 @@ app.post("/delete", (req, res) => {
 //This function responses the register request.
 app.post("/register", (req, res) => {
   const email = req.body.email;
-  const password = md5(req.body.password);
-
-  //Check if email and password are empty.
-  if (email !== "" && password !== "") {
-    //If the email already exits, show the error message.
-    User.findOne({ email: email }, (err, foundUser) => {
-      if (foundUser != null) {
-        res.render("fail_message", { fail_msg: "This email already exits." });
-      } else {
-        //Everything ok, create this account.
-        const newUser = new User({
-          email: email,
-          password: password,
-        });
-        //Save new user
-        newUser.save((err) => {
-          if (err) {
-            console.log(err);
-          } else {
-            //Go back to the homepage.
-            const encodeEmail = encodeURIComponent(email);
-            res.redirect("/home?valid=" + encodeEmail);
-          }
-        });
-      }
-    });
-  }
+  //Hash password.
+  bcrypt.hash(req.body.password, saltRounds, (err, hash) => {
+    //Check if email and password are empty.
+    if (email !== "" && hash !== "") {
+      //If the email already exits, show the error message.
+      User.findOne({ email: email }, (err, foundUser) => {
+        if (foundUser != null) {
+          res.render("fail_message", { fail_msg: "This email already exits." });
+        } else {
+          //Everything ok, create this account.
+          const newUser = new User({
+            email: email,
+            password: hash,
+          });
+          //Save new user
+          newUser.save((err) => {
+            if (err) {
+              console.log(err);
+            } else {
+              //Go back to the homepage.
+              const encodeEmail = encodeURIComponent(email);
+              res.redirect("/home?valid=" + encodeEmail);
+            }
+          });
+        }
+      });
+    }
+  });
 });
 
 //This function responses the login request.
 app.post("/login", (req, res) => {
   const email = req.body.email;
-  const password = md5(req.body.password);
+  const password = req.body.password;
 
   //Check if this email already exits.
   User.findOne({ email: email }, (err, foundUser) => {
     if (foundUser) {
-      if (foundUser.password === password) {
-        //Show all data from the database.
-        Post.find({ userEmail: email }, (err, foundItems) => {
-          if (err) {
-            console.log(err);
-          } else {
-            //Go back to the homepage.
-            const encodeEmail = encodeURIComponent(email);
-            res.redirect("/home?valid=" + encodeEmail);
-          }
-        });
-      } else {
-        //Password is incorrect, show fail msg.
-        res.render("fail_message", {
-          fail_msg: "Your password is incorrect.",
-        });
-      }
+      //Check password
+      bcrypt.compare(password, foundUser.password, (err, result) => {
+        //If input password matches the record.
+        if (result) {
+          //Show all data from the database.
+          Post.find({ userEmail: email }, (err, foundItems) => {
+            if (err) {
+              console.log(err);
+            } else {
+              //Go back to the homepage.
+              const encodeEmail = encodeURIComponent(email);
+              res.redirect("/home?valid=" + encodeEmail);
+            }
+          });
+        } else {
+          //Password is incorrect, show fail msg.
+          res.render("fail_message", {
+            fail_msg: "Your password is incorrect.",
+          });
+        }
+      });
     } else {
       //Email is incorrect, show fail msg.
       res.render("fail_message", {
