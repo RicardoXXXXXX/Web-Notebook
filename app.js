@@ -3,6 +3,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const ejs = require("ejs");
 const mongoose = require("mongoose");
+const md5 = require("md5");
 
 const homeStartingContent = "Wanna write something down today?";
 const aboutContent =
@@ -188,7 +189,7 @@ app.post("/delete", (req, res) => {
 //This function responses the register request.
 app.post("/register", (req, res) => {
   const email = req.body.email;
-  const password = req.body.password;
+  const password = md5(req.body.password);
 
   //Check if email and password are empty.
   if (email !== "" && password !== "") {
@@ -220,11 +221,11 @@ app.post("/register", (req, res) => {
 //This function responses the login request.
 app.post("/login", (req, res) => {
   const email = req.body.email;
-  const password = req.body.password;
+  const password = md5(req.body.password);
 
   //Check if this email already exits.
   User.findOne({ email: email }, (err, foundUser) => {
-    if (!err) {
+    if (foundUser) {
       if (foundUser.password === password) {
         //Show all data from the database.
         Post.find({ userEmail: email }, (err, foundItems) => {
@@ -236,7 +237,17 @@ app.post("/login", (req, res) => {
             res.redirect("/home?valid=" + encodeEmail);
           }
         });
+      } else {
+        //Password is incorrect, show fail msg.
+        res.render("fail_message", {
+          fail_msg: "Your password is incorrect.",
+        });
       }
+    } else {
+      //Email is incorrect, show fail msg.
+      res.render("fail_message", {
+        fail_msg: "Your account doesn't exist.",
+      });
     }
   });
 });

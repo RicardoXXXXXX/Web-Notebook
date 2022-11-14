@@ -78,6 +78,14 @@
   color: aliceblue;
 }
 
+.btn-back {
+  left: 29rem;
+  position: absolute;
+
+  color: #353935;
+  border-color: transparent;
+}
+
 #single-post {
   margin-top: 2rem;
 }

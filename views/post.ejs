@@ -1,14 +1,15 @@
 <%- include("partials/header"); -%>
 
 <div class="content">
-  
+  <button type="button" class="btn-back btn btn-secondary"  onclick="window.location.href='/home?valid=<%=userEmail %>';">
+    &larr;
+  </button>
   <h2 style="display: inline">
     <%=title %>
     <h3 style="display: inline">- written at <%=date %></h4>
   </h2>
   <hr style="border-top: 1px solid #353935" />
   <p><%=content %></p>
-    
   <form class="post-form" action="/edit" method="POST">
     <input type="hidden" name="id" value=<%=id %> >
     <button type="submit" class="btn btn-primary edit-btn" name="userEmail" value=<%=userEmail %>>Edit</button>
