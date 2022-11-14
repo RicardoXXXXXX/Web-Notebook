@@ -118,7 +118,7 @@ app.post("/compose", (req, res) => {
       newPost.save(); //Add new post.
     } else {
       //For empty title, show error message, adding unsuccessfully.
-      console.log("Sorry, title cannot be empty.");
+      console.log("Sorry, the title cannot be empty.");
     }
   }
   //id isn't empty,which means this post needs to be changed
@@ -128,7 +128,7 @@ app.post("/compose", (req, res) => {
       { title: title, content: content, date: date },
       (err, foundList) => {
         if (!err) {
-          console.log(title + " is successfully changed");
+          console.log(title + " was successfully changed.");
         }
       }
     );
@@ -176,7 +176,7 @@ app.post("/delete", (req, res) => {
     if (err) {
       console.log(err);
     } else {
-      console.log(deletedPost.title + " is deleted.");
+      console.log(deletedPost.title + " was successfully deleted.");
     }
   });
 
@@ -189,13 +189,8 @@ app.post("/delete", (req, res) => {
 app.post("/register", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
-  // User.findOne({ email: email }, (err, foundUser) => {
-  //   console.log(foundUser);
-  //   if (foundUser != null) {
-  //     console.log("Exits");
-  //   }
-  // });
 
+  //Check if email and password are empty.
   if (email !== "" && password !== "") {
     //If the email already exits, show the error message.
     User.findOne({ email: email }, (err, foundUser) => {
@@ -212,14 +207,9 @@ app.post("/register", (req, res) => {
           if (err) {
             console.log(err);
           } else {
-            Post.find({ userEmail: email }, (err, foundPosts) => {
-              res.render("home", {
-                startingContent: homeStartingContent,
-                contents: foundPosts,
-                date: day,
-                userEmail: email,
-              });
-            });
+            //Go back to the homepage.
+            const encodeEmail = encodeURIComponent(email);
+            res.redirect("/home?valid=" + encodeEmail);
           }
         });
       }
@@ -241,12 +231,9 @@ app.post("/login", (req, res) => {
           if (err) {
             console.log(err);
           } else {
-            res.render("home", {
-              startingContent: homeStartingContent,
-              contents: foundItems,
-              date: day,
-              userEmail: email,
-            });
+            //Go back to the homepage.
+            const encodeEmail = encodeURIComponent(email);
+            res.redirect("/home?valid=" + encodeEmail);
           }
         });
       }
