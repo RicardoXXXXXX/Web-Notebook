@@ -1,5 +1,5 @@
-# Web-diary
-This project provides a web application which allows users to CRUD diaries online.
+# Web Notebook
+This project provides a web notebook application that allows users to CRUD notes online.
 
 ## Instructions
 * Please use the following command to install all the required node modules before running the server.
