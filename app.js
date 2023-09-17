@@ -8,7 +8,7 @@ const saltRounds = 11;
 
 const homeStartingContent = "Wanna write something down today?";
 const aboutContent =
-  "This is a web diary system, feel free to wrtite something here.";
+  "This is a web notebook system, feel free to wrtite something here.";
 const contactContent =
   "For more details, please send an email to lingpeng.xiao@gmail.com";
 
